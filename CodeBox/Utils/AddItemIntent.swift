@@ -47,18 +47,14 @@ struct AddItemIntent: AppIntent {
     }
 
     private static func makeContainer() throws -> ModelContainer {
-        guard let groupURL = FileManager.default.containerURL(
-            forSecurityApplicationGroupIdentifier: "group.com.jiezhang.CodeBox"
-        ) else {
-            throw IntentError.appGroupUnavailable
-        }
         let schema = Schema([ClipboardItem.self, AIModel.self])
-        let config = ModelConfiguration(schema: schema, url: groupURL.appendingPathComponent("CodeBox.store"))
-        return try ModelContainer(for: schema, configurations: [config])
+        if let groupURL = FileManager.default.containerURL(
+            forSecurityApplicationGroupIdentifier: "group.com.jiezhang.CodeBox"
+        ) {
+            let config = ModelConfiguration(schema: schema, url: groupURL.appendingPathComponent("CodeBox.store"))
+            return try ModelContainer(for: schema, configurations: [config])
+        }
+        // App Group 不可用时降级到沙盒默认路径
+        return try ModelContainer(for: schema)
     }
-}
-
-private enum IntentError: Error, CustomLocalizedStringResourceConvertible {
-    case appGroupUnavailable
-    var localizedStringResource: LocalizedStringResource { "App Group 未配置" }
 }

@@ -5,14 +5,15 @@ import SwiftData
 struct CodeBoxApp: App {
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([ClipboardItem.self, AIModel.self])
-        // 与 AddItemIntent 共享同一个 App Group 存储，确保 Intent 写入的数据主 App 可见
-        guard let groupURL = FileManager.default.containerURL(
+        // 优先使用 App Group 共享存储，不可用时降级到沙盒默认路径
+        let config: ModelConfiguration
+        if let groupURL = FileManager.default.containerURL(
             forSecurityApplicationGroupIdentifier: "group.com.jiezhang.CodeBox"
-        ) else {
-            fatalError("App Group 未配置，请在 Xcode → Signing & Capabilities 中添加 App Group")
+        ) {
+            config = ModelConfiguration(schema: schema, url: groupURL.appendingPathComponent("CodeBox.store"))
+        } else {
+            config = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
         }
-        let storeURL = groupURL.appendingPathComponent("CodeBox.store")
-        let config = ModelConfiguration(schema: schema, url: storeURL)
         do {
             return try ModelContainer(for: schema, configurations: [config])
         } catch {
