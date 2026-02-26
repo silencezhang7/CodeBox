@@ -1,7 +1,10 @@
 import SwiftUI
+import SwiftData
 
 struct ContentView: View {
     @AppStorage("app_theme") private var themeRaw: String = AppTheme.system.rawValue
+    @Environment(\.modelContext) private var modelContext
+    @State private var screenshotMonitor = ScreenshotMonitor()
 
     var body: some View {
         TabView {
@@ -23,6 +26,7 @@ struct ContentView: View {
                 }
         }
         .preferredColorScheme(AppTheme(rawValue: themeRaw)?.colorScheme)
+        .onAppear { screenshotMonitor.start(context: modelContext) }
     }
 }
 

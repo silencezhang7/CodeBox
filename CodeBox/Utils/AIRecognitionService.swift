@@ -9,6 +9,33 @@ struct AIRecognitionResult {
 }
 
 struct AIRecognitionService {
+    @MainActor
+    static func recognizeImage(imageData: Data, model: AIModel) async throws -> AIRecognitionResult {
+        guard let url = buildURL(model) else { throw URLError(.badURL) }
+
+        let base64 = imageData.base64EncodedString()
+        let prompt = """
+        请分析图片，提取快递取件码或验证码，严格以JSON格式返回，不要有其他内容：
+        {
+          "type": "取件码" 或 "验证码" 或 "其他",
+          "code": "提取的码，无则空字符串",
+          "platform": "平台名称（如菜鸟、丰巢、顺丰等），无则null",
+          "stationName": "驿站名称，无则null",
+          "stationAddress": "驿站地址，无则null"
+        }
+        """
+
+        var request = URLRequest(url: url, timeoutInterval: 30)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        applyHeaders(&request, model: model)
+        request.httpBody = try JSONSerialization.data(withJSONObject: buildImageBody(model: model, base64: base64, prompt: prompt))
+
+        let (data, _) = try await URLSession.shared.data(for: request)
+        return try parseResponse(data: data, provider: model.provider, fallback: "")
+    }
+
+    @MainActor
     static func recognize(text: String, model: AIModel) async throws -> AIRecognitionResult {
         guard let url = buildURL(model) else { throw URLError(.badURL) }
 
@@ -52,6 +79,23 @@ struct AIRecognitionService {
             request.setValue("2023-06-01", forHTTPHeaderField: "anthropic-version")
         } else {
             request.setValue("Bearer \(model.apiKey)", forHTTPHeaderField: "Authorization")
+        }
+    }
+
+    private static func buildImageBody(model: AIModel, base64: String, prompt: String) -> [String: Any] {
+        if model.provider == AIProvider.anthropic.rawValue {
+            let content: [[String: Any]] = [
+                ["type": "image", "source": ["type": "base64", "media_type": "image/jpeg", "data": base64]],
+                ["type": "text", "text": prompt]
+            ]
+            return ["model": model.modelId, "max_tokens": 512, "messages": [["role": "user", "content": content]]]
+        } else {
+            // OpenAI vision 格式
+            let content: [[String: Any]] = [
+                ["type": "image_url", "image_url": ["url": "data:image/jpeg;base64,\(base64)"]],
+                ["type": "text", "text": prompt]
+            ]
+            return ["model": model.modelId, "messages": [["role": "user", "content": content]], "max_tokens": 512]
         }
     }
 

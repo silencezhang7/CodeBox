@@ -26,9 +26,13 @@
 		CC00112F4ECAF600AAA06F11 /* ModelTestService.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB00112F4ECAF600AAA06F11 /* ModelTestService.swift */; };
 		CC00122F4ECAF600AAA06F12 /* AddItemIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB00122F4ECAF600AAA06F12 /* AddItemIntent.swift */; };
 		CC00132F4ECAF600AAA06F13 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BB00132F4ECAF600AAA06F13 /* Assets.xcassets */; };
+		CC00142F4ECAF600AAA06F14 /* ScreenshotMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB00142F4ECAF600AAA06F14 /* ScreenshotMonitor.swift */; };
+		CC00152F4ECAF600AAA06F15 /* AppShortcuts.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB00152F4ECAF600AAA06F15 /* AppShortcuts.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		975856BC2F50340D00AAA06F /* CodeBox.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CodeBox.entitlements; sourceTree = "<group>"; };
+		975856BD2F503EB800AAA06F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		AA0002AA2F4ECAF600AAA06F /* CodeBox.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CodeBox.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BB00012F4ECAF600AAA06F01 /* CodeBoxApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodeBoxApp.swift; sourceTree = "<group>"; };
 		BB00022F4ECAF600AAA06F02 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -49,6 +53,8 @@
 		BB00112F4ECAF600AAA06F11 /* ModelTestService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelTestService.swift; sourceTree = "<group>"; };
 		BB00122F4ECAF600AAA06F12 /* AddItemIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddItemIntent.swift; sourceTree = "<group>"; };
 		BB00132F4ECAF600AAA06F13 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		BB00142F4ECAF600AAA06F14 /* ScreenshotMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenshotMonitor.swift; sourceTree = "<group>"; };
+		BB00152F4ECAF600AAA06F15 /* AppShortcuts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppShortcuts.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -81,8 +87,9 @@
 		DD00012F4ECAF600AAA06F01 /* CodeBox */ = {
 			isa = PBXGroup;
 			children = (
+				975856BD2F503EB800AAA06F /* Info.plist */,
+				975856BC2F50340D00AAA06F /* CodeBox.entitlements */,
 				BB00012F4ECAF600AAA06F01 /* CodeBoxApp.swift */,
-				BB00022F4ECAF600AAA06F02 /* ContentView.swift */,
 				BB00132F4ECAF600AAA06F13 /* Assets.xcassets */,
 				DD00022F4ECAF600AAA06F02 /* Models */,
 				DD00032F4ECAF600AAA06F03 /* Views */,
@@ -113,6 +120,7 @@
 				BB000C2F4ECAF600AAA06F0C /* ModelRowView.swift */,
 				BB000D2F4ECAF600AAA06F0D /* AddModelView.swift */,
 				BB000E2F4ECAF600AAA06F0E /* LiquidGlassModifier.swift */,
+				BB00022F4ECAF600AAA06F02 /* ContentView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -124,6 +132,8 @@
 				BB00102F4ECAF600AAA06F10 /* AIRecognitionService.swift */,
 				BB00112F4ECAF600AAA06F11 /* ModelTestService.swift */,
 				BB00122F4ECAF600AAA06F12 /* AddItemIntent.swift */,
+				BB00142F4ECAF600AAA06F14 /* ScreenshotMonitor.swift */,
+				BB00152F4ECAF600AAA06F15 /* AppShortcuts.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -218,6 +228,8 @@
 				CC00102F4ECAF600AAA06F10 /* AIRecognitionService.swift in Sources */,
 				CC00112F4ECAF600AAA06F11 /* ModelTestService.swift in Sources */,
 				CC00122F4ECAF600AAA06F12 /* AddItemIntent.swift in Sources */,
+				CC00142F4ECAF600AAA06F14 /* ScreenshotMonitor.swift in Sources */,
+				CC00152F4ECAF600AAA06F15 /* AppShortcuts.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -346,11 +358,14 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = CodeBox/CodeBox.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = GATS57PR7G;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = CodeBox/Info.plist;
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "用于识别截图中的取件码和验证码";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -362,7 +377,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.jiezhang.CodeBox";
+				PRODUCT_BUNDLE_IDENTIFIER = com.jiezhang.CodeBox;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 6.0;
@@ -375,11 +390,14 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = CodeBox/CodeBox.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = GATS57PR7G;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = CodeBox/Info.plist;
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "用于识别截图中的取件码和验证码";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -391,7 +409,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.jiezhang.CodeBox";
+				PRODUCT_BUNDLE_IDENTIFIER = com.jiezhang.CodeBox;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 6.0;
