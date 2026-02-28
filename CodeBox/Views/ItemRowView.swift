@@ -1,268 +1,307 @@
 import SwiftUI
-import UIKit
-
-struct DashedLine: Shape {
-    func path(in rect: CGRect) -> Path {
-        var path = Path()
-        path.move(to: CGPoint(x: 0, y: 0))
-        path.addLine(to: CGPoint(x: rect.width, y: 0))
-        return path
-    }
-}
+import SwiftData
 
 struct ItemRowView: View {
     @Bindable var item: ClipboardItem
-    @State private var showingDetails = false
 
     var body: some View {
-        frontCard
-            .background(Color(uiColor: .systemBackground))
-            .cornerRadius(16)
-            .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 4)
-            .onTapGesture {
-                showingDetails = true
-            }
-            .sheet(isPresented: $showingDetails) {
-                NavigationStack {
-                    ScrollView {
-                        backCard
-                            .padding()
-                    }
-                    .background(Color(uiColor: .secondarySystemBackground).ignoresSafeArea())
-                    .navigationTitle("")
-                    .navigationBarTitleDisplayMode(.inline)
-                    .toolbar {
-                        ToolbarItem(placement: .navigationBarTrailing) {
-                            Button {
-                                showingDetails = false
-                            } label: {
-                                Image(systemName: "xmark")
-                                    .font(.system(size: 14, weight: .bold))
-                                    .foregroundColor(.white)
-                                    .padding(8)
-                                    .background(Color.gray.opacity(0.8))
-                                    .clipShape(Circle())
-                            }
-                        }
-                    }
-                }
-                .presentationDetents([.medium, .large])
-            }
+        if item.isUsed {
+            completedCard
+        } else {
+            pendingCard
+        }
     }
 
-    // MARK: - 正面
-    private var frontCard: some View {
-        HStack(alignment: .top, spacing: 12) {
-            // 左侧 Logo
-            VStack {
-                Text(item.sourcePlatform?.prefix(4) ?? "快递")
-                    .font(.system(size: 10))
-                    .multilineTextAlignment(.center)
-                    .foregroundColor(.secondary)
-                    .frame(width: 44, height: 44)
-                    .background(
-                        RoundedRectangle(cornerRadius: 8)
-                            .stroke(Color.gray.opacity(0.3), lineWidth: 1)
-                    )
-            }
-            .padding(.top, 4)
-
-            // 右侧内容
-            VStack(alignment: .leading, spacing: 8) {
-                // 第一行：平台、标签、时间
-                HStack(alignment: .center) {
-                    Text(item.sourcePlatform ?? (item.typeRaw == "验证码" ? "短信" : "未知"))
-                        .font(.headline)
-                        .fontWeight(.bold)
-                        .foregroundColor(.primary)
-
-                    Text(item.typeRaw)
-                        .font(.system(size: 10, weight: .medium))
-                        .padding(.horizontal, 6)
-                        .padding(.vertical, 2)
-                        .background(Color.blue)
+    // MARK: - 待取卡片样式 (深色大卡片 / 浅色适配)
+    private var pendingCard: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            // 顶部：图标与状态
+            HStack {
+                // 左侧平台图标
+                ZStack {
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(Color(red: 0.95, green: 0.75, blue: 0.35)) // 黄色
+                        .frame(width: 40, height: 40)
+                    Image(systemName: "box.truck")
                         .foregroundColor(.white)
-                        .clipShape(Capsule())
-
-                    Spacer()
-
-                    Text(item.createdAt.formatted(.dateTime.month().day().hour().minute().locale(Locale(identifier: "zh_CN"))))
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+                        .font(.system(size: 20))
                 }
-
-                // 第二行：地址
-                if let addr = item.stationAddress {
-                    Text(addr)
-                        .font(.footnote)
+                
+                Spacer()
+                
+                // 右侧状态与操作圈
+                HStack(spacing: 6) {
+                    Circle()
+                        .fill(Color.green)
+                        .frame(width: 6, height: 6)
+                    Text("待取")
+                        .font(.system(size: 14))
                         .foregroundColor(.secondary)
-                        .lineLimit(1)
-                }
-
-                // 虚线分割线
-                DashedLine()
-                    .stroke(style: StrokeStyle(lineWidth: 1, dash: [4]))
-                    .frame(height: 1)
-                    .foregroundColor(Color.gray.opacity(0.3))
-                    .padding(.vertical, 4)
-
-                // 第三行：取件码和操作按钮
-                HStack {
-                    Text(item.content)
-                        .font(.system(size: 32, weight: .bold))
-                        .foregroundColor(item.isUsed ? Color(uiColor: .systemGray2) : .primary)
-                        .strikethrough(item.isUsed, color: Color(uiColor: .systemGray2))
-
-                    Spacer()
-
-                    Button {
-                        UIPasteboard.general.string = item.content
+                    
+                    Button(action: {
                         withAnimation {
-                            item.isUsed.toggle()
+                            item.isUsed = true
                         }
-                    } label: {
-                        if item.isUsed {
-                            Image(systemName: "checkmark")
-                                .font(.system(size: 28, weight: .medium))
-                                .foregroundColor(.green)
-                        } else {
-                            Circle()
-                                .stroke(Color.blue, lineWidth: 1.5)
-                                .frame(width: 28, height: 28)
-                        }
+                    }) {
+                        Circle()
+                            .stroke(Color.secondary, lineWidth: 1.5)
+                            .frame(width: 20, height: 20)
                     }
-                    .buttonStyle(.plain)
+                }
+            }
+            
+            // 中间：大字号取件码
+            Text(item.content)
+                .font(.system(size: 32, weight: .bold))
+                .foregroundColor(.primary)
+            
+            // 底部：地址和图标
+            HStack {
+                Text(item.stationAddress ?? item.stationName ?? "未知地址")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                
+                Spacer()
+                
+                Image(systemName: "person.circle.fill")
+                    .foregroundColor(Color.secondary.opacity(0.5))
+                    .font(.system(size: 24))
+            }
+        }
+        .padding(16)
+        .background(Color(uiColor: .secondarySystemGroupedBackground))
+        .cornerRadius(16)
+    }
+
+    // MARK: - 已取卡片样式 (深色横向卡片 / 浅色适配)
+    private var completedCard: some View {
+        HStack(spacing: 16) {
+            // 左侧图标
+            ZStack {
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color(red: 0.35, green: 0.60, blue: 0.75)) // 蓝色
+                    .frame(width: 48, height: 48)
+                Image(systemName: item.sourcePlatform?.contains("菜鸟") == true ? "bird" : "shippingbox")
+                    .foregroundColor(.white)
+                    .font(.system(size: 24))
+            }
+            
+            // 中间内容
+            VStack(alignment: .leading, spacing: 6) {
+                Text(item.content)
+                    .font(.system(size: 20, weight: .bold))
+                    .foregroundColor(.primary)
+                Text(item.sourcePlatform ?? "快递")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+            
+            Spacer()
+            
+            // 右侧内容
+            VStack(alignment: .trailing, spacing: 6) {
+                Text(item.stationAddress ?? item.stationName ?? "未知地址")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                
+                HStack(spacing: 4) {
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundColor(.green)
+                        .font(.system(size: 12))
+                    Text(item.createdAt.formatted(.dateTime.month().day().locale(Locale(identifier: "zh_CN"))))
+                        .font(.caption)
+                        .foregroundColor(.green)
                 }
             }
         }
         .padding(16)
+        .background(Color(uiColor: .secondarySystemGroupedBackground))
+        .cornerRadius(16)
     }
+}
 
-    // MARK: - 背面
-    private var backCard: some View {
-        VStack(spacing: 20) {
+struct ItemDetailView: View {
+    @Environment(\.modelContext) private var modelContext
+    @Environment(\.dismiss) private var dismiss
+    @Bindable var item: ClipboardItem
+    
+    // 渐变背景色
+    private let bgGradient = LinearGradient(
+        colors: [
+            Color(red: 0.18, green: 0.38, blue: 0.52), // 顶部偏蓝
+            Color(red: 0.35, green: 0.60, blue: 0.75), // 中间浅蓝
+            Color(uiColor: .systemGroupedBackground) // 底部适配系统背景色
+        ],
+        startPoint: .top,
+        endPoint: UnitPoint(x: 0.5, y: 0.6)
+    )
+
+    var body: some View {
+        ZStack(alignment: .top) {
+            bgGradient.ignoresSafeArea()
             
-            // 已完成状态顶部横幅
-            if item.isUsed {
-                VStack(spacing: 0) {
-                    HStack(spacing: 12) {
-                        Image(systemName: "checkmark")
-                            .font(.system(size: 28, weight: .bold))
-                            .foregroundColor(.black)
+            VStack(spacing: 0) {
+                // 顶部信息区
+                VStack(spacing: 16) {
+                    // Logo
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 20)
+                            .fill(Color(red: 0.45, green: 0.73, blue: 0.90))
+                            .frame(width: 80, height: 80)
                         
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("已完成取件")
-                                .font(.headline)
-                                .fontWeight(.bold)
-                                .foregroundColor(.black)
-                            Text("完成于 \(item.createdAt.formatted(.dateTime.year().month().day().hour().minute().locale(Locale(identifier: "zh_CN"))))")
-                                .font(.subheadline)
-                                .foregroundColor(.black.opacity(0.7))
-                        }
-                        Spacer()
+                        // 占位图标，如果是菜鸟使用鸟图标，否则使用通用图标
+                        Image(systemName: item.sourcePlatform?.contains("菜鸟") == true ? "bird" : "shippingbox")
+                            .font(.system(size: 40))
+                            .foregroundColor(.white)
                     }
-                    .padding()
-                    .background(Color.green)
-                }
-                .clipShape(RoundedRectangle(cornerRadius: 16))
-                .padding(.bottom, 8)
-            }
-
-            // 主卡片
-            VStack(alignment: .leading, spacing: 0) {
-                // 顶部橙色条
-                Rectangle()
-                    .fill(Color.orange)
-                    .frame(height: 4)
-
-                VStack(alignment: .leading, spacing: 16) {
-                    // 头部：Logo 和 名称
-                    HStack(spacing: 12) {
-                        Text(item.sourcePlatform?.prefix(4) ?? "快递")
-                            .font(.system(size: 10))
-                            .multilineTextAlignment(.center)
-                            .foregroundColor(.secondary)
-                            .frame(width: 44, height: 44)
-                            .background(
-                                RoundedRectangle(cornerRadius: 8)
-                                    .stroke(Color.gray.opacity(0.3), lineWidth: 1)
-                            )
-
-                        Text(item.sourcePlatform ?? (item.typeRaw == "验证码" ? "短信" : "未知"))
-                            .font(.title2)
-                            .fontWeight(.bold)
-                    }
-
-                    Divider()
-
+                    .padding(.top, 20)
+                    
                     // 取件码
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("取件码")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                        Text(item.content)
-                            .font(.system(size: 40, weight: .heavy))
+                    Text(item.content)
+                        .font(.system(size: 44, weight: .bold))
+                        .foregroundColor(.white)
+                    
+                    // 平台和时间
+                    HStack(spacing: 6) {
+                        Text(item.sourcePlatform ?? "快递")
+                        Text("·")
+                        Text(item.createdAt.formatted(.dateTime.month().day().locale(Locale(identifier: "zh_CN"))))
                     }
-
-                    // 详细信息列表
-                    VStack(spacing: 16) {
-                        detailRow(icon: "box.truck", label: "快递公司", value: item.sourcePlatform ?? (item.typeRaw == "验证码" ? "短信" : "未知"))
-                        if let name = item.stationName {
-                            detailRow(icon: "building.2", label: "驿站名称", value: name)
-                        }
-                        if let addr = item.stationAddress {
-                            detailRow(icon: "mappin.and.ellipse", label: "详细地址", value: addr)
-                        }
-                        detailRow(icon: "clock", label: "时间", value: item.createdAt.formatted(.dateTime.year().month().day().hour().minute().locale(Locale(identifier: "zh_CN"))))
-                    }
-                    .padding(.top, 8)
+                    .font(.subheadline)
+                    .foregroundColor(Color.white.opacity(0.8))
                 }
-                .padding(20)
-            }
-            .background(Color(uiColor: .systemBackground))
-            .cornerRadius(16)
-            .shadow(color: .black.opacity(0.05), radius: 10, x: 0, y: 5)
-
-            // 原始短信卡片
-            if let original = item.originalContent, !original.isEmpty {
-                VStack(alignment: .leading, spacing: 10) {
-                    Label("原始短信", systemImage: "doc.text")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-
-                    Text(original)
-                        .font(.callout)
-                        .foregroundColor(.secondary)
-                        .padding()
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .background(Color(uiColor: .systemBackground))
-                        .cornerRadius(12)
-                        .shadow(color: .black.opacity(0.03), radius: 5, x: 0, y: 2)
-                        .onTapGesture {
-                            UIPasteboard.general.string = original
+                .padding(.bottom, 40)
+                
+                // 底部信息列表区
+                ScrollView {
+                    VStack(spacing: 16) {
+                        // 所属账户
+                        DetailInfoRow(title: "所属账户", content: "默认账户", hasDisclosure: true, icon: "person.circle.fill")
+                        
+                        // 取件地点
+                        if let address = item.stationAddress ?? item.stationName {
+                            DetailInfoRow(title: "取件地点", content: address)
                         }
+                        
+                        // 原始短信内容
+                        if let original = item.originalContent, !original.isEmpty {
+                            VStack(alignment: .leading, spacing: 0) {
+                                Text(original)
+                                    .font(.subheadline)
+                                    .foregroundColor(.primary)
+                                    .lineSpacing(4)
+                                    .padding(16)
+                            }
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .background(Color(uiColor: .secondarySystemGroupedBackground))
+                            .cornerRadius(12)
+                        }
+                        
+                        // 取件时间
+                        DetailInfoRow(title: "取件时间", content: item.createdAt.formatted(.dateTime.month().day().hour().minute().locale(Locale(identifier: "zh_CN"))))
+                        
+                        Spacer().frame(height: 40)
+                        
+                        // 底部按钮区
+                        VStack(spacing: 16) {
+                            Button(action: {
+                                withAnimation {
+                                    item.isUsed.toggle()
+                                }
+                            }) {
+                                HStack {
+                                    Image(systemName: item.isUsed ? "arrow.uturn.backward.circle" : "checkmark.circle")
+                                    Text(item.isUsed ? "标记为待取" : "标记为已取")
+                                }
+                                .font(.headline)
+                                .foregroundColor(.white)
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(Color(red: 0.85, green: 0.55, blue: 0.20)) // 橙色
+                                .cornerRadius(12)
+                            }
+                            
+                            Button(action: {
+                                modelContext.delete(item)
+                                dismiss()
+                            }) {
+                                HStack {
+                                    Image(systemName: "trash")
+                                    Text("删除")
+                                }
+                                .font(.headline)
+                                .foregroundColor(Color.red)
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(Color(uiColor: .systemGroupedBackground))
+                                .cornerRadius(12)
+                            }
+                        }
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.bottom, 40)
+                }
+            }
+        }
+        .navigationBarBackButtonHidden(true)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarLeading) {
+                Button(action: { dismiss() }) {
+                    Image(systemName: "chevron.left")
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundColor(.white)
+                        .frame(width: 36, height: 36)
+                        .background(Color.white.opacity(0.2))
+                        .clipShape(Circle())
+                }
+            }
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button(action: {
+                    // 编辑功能预留
+                }) {
+                    Text("编辑")
+                        .font(.system(size: 14))
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(Color.white.opacity(0.2))
+                        .clipShape(Capsule())
                 }
             }
         }
     }
+}
 
-    private func detailRow(icon: String, label: String, value: String) -> some View {
-        HStack(alignment: .top, spacing: 12) {
-            Image(systemName: icon)
-                .font(.system(size: 16))
-                .foregroundColor(.gray)
-                .frame(width: 24)
-                .padding(.top, 2)
-
-            VStack(alignment: .leading, spacing: 4) {
-                Text(label)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                Text(value)
-                    .font(.subheadline)
-                    .foregroundColor(.primary)
-            }
+// 辅助信息行组件
+struct DetailInfoRow: View {
+    var title: String
+    var content: String
+    var hasDisclosure: Bool = false
+    var icon: String? = nil
+    
+    var body: some View {
+        HStack {
+            Text(title)
+                .foregroundColor(.primary)
+                .font(.subheadline)
             Spacer()
+            HStack(spacing: 6) {
+                if let icon = icon {
+                    Image(systemName: icon)
+                        .foregroundColor(.secondary)
+                }
+                Text(content)
+                    .foregroundColor(.secondary)
+                    .font(.subheadline)
+                if hasDisclosure {
+                    Image(systemName: "chevron.right")
+                        .foregroundColor(.secondary)
+                        .font(.system(size: 12))
+                }
+            }
         }
+        .padding(16)
+        .background(Color(uiColor: .secondarySystemGroupedBackground))
+        .cornerRadius(12)
     }
 }

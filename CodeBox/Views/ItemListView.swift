@@ -5,6 +5,7 @@ struct ItemListView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var items: [ClipboardItem]
     @State private var showingAddSheet = false
+    @State private var showingQuickMarkBanner = true
 
     let filterType: ItemType
 
@@ -16,44 +17,138 @@ struct ItemListView: View {
         }, sort: \ClipboardItem.createdAt, order: .reverse)
     }
 
+    var pendingItems: [ClipboardItem] {
+        items.filter { !$0.isUsed }
+    }
+
+    var completedItems: [ClipboardItem] {
+        items.filter { $0.isUsed }
+    }
+
     var body: some View {
         NavigationStack {
-            Group {
-                if items.isEmpty {
-                    ZStack {
-                        Color(uiColor: .secondarySystemBackground)
-                            .ignoresSafeArea()
-                        VStack {
-                            Image(systemName: filterType == .pickupCode ? "shippingbox" : "lock.shield")
-                                .font(.system(size: 60))
-                                .foregroundColor(.gray.opacity(0.5))
-                                .padding(.bottom, 10)
-                            Text("暂无\(filterType.rawValue)数据")
-                                .foregroundColor(.gray)
+            ScrollView {
+                VStack(alignment: .leading, spacing: 24) {
+                    
+                    // 1. 顶部数据看板
+                    HStack(spacing: 16) {
+                        // 待取卡片
+                        DashboardCard(
+                            title: "待取",
+                            icon: "shippingbox.circle.fill",
+                            iconColor: .orange,
+                            count: pendingItems.count
+                        )
+                        
+                        // 已取卡片
+                        DashboardCard(
+                            title: "本月已取",
+                            icon: "checkmark.square.fill",
+                            iconColor: .green,
+                            count: completedItems.count,
+                            showArrow: true
+                        )
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.top, 16)
+                    
+                    // 2. 待取件区域
+                    if !pendingItems.isEmpty {
+                        VStack(alignment: .leading, spacing: 16) {
+                            HStack {
+                                Text("待取件 (\(pendingItems.count))")
+                                    .font(.headline)
+                                    .foregroundColor(.primary)
+                                Spacer()
+                                Image(systemName: "list.bullet")
+                                    .foregroundColor(.secondary)
+                            }
+                            .padding(.horizontal, 16)
+                            
+                            ForEach(pendingItems) { item in
+                                NavigationLink(destination: ItemDetailView(item: item)) {
+                                    ItemRowView(item: item)
+                                        .padding(.horizontal, 16)
+                                }
+                                .buttonStyle(.plain)
+                            }
                         }
                     }
-                } else {
-                    List {
-                        ForEach(items) { item in
-                            ItemRowView(item: item)
-                                .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
-                                .listRowSeparator(.hidden)
-                                .listRowBackground(Color.clear)
+                    
+                    // 3. 快速标记已取提示横幅
+                    if showingQuickMarkBanner {
+                        HStack(spacing: 12) {
+                            Image(systemName: "hand.tap.fill")
+                                .foregroundColor(.blue)
+                                .font(.system(size: 24))
+                            
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("快速标记已取")
+                                    .font(.subheadline)
+                                    .fontWeight(.bold)
+                                    .foregroundColor(.primary)
+                                Text("点击待取件卡片即可快速标记为已取")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                            
+                            Spacer()
+                            
+                            Button(action: {
+                                withAnimation { showingQuickMarkBanner = false }
+                            }) {
+                                Image(systemName: "xmark.circle.fill")
+                                    .foregroundColor(.secondary)
+                                    .font(.system(size: 20))
+                            }
                         }
-                        .onDelete { indexSet in
-                            for index in indexSet { modelContext.delete(items[index]) }
+                        .padding(16)
+                        .background(Color(uiColor: .secondarySystemGroupedBackground))
+                        .cornerRadius(12)
+                        .padding(.horizontal, 16)
+                    }
+                    
+                    // 4. 已取件区域 (所有取件码)
+                    VStack(alignment: .leading, spacing: 16) {
+                        HStack {
+                            Text("所有取件码")
+                                .font(.headline)
+                                .foregroundColor(.primary)
+                            Image(systemName: "chevron.right")
+                                .foregroundColor(.secondary)
+                                .font(.system(size: 14))
+                        }
+                        .padding(.horizontal, 16)
+                        
+                        if completedItems.isEmpty {
+                            Text("暂无已取件数据")
+                                .foregroundColor(.secondary)
+                                .padding(.horizontal, 16)
+                        } else {
+                            ForEach(completedItems) { item in
+                                NavigationLink(destination: ItemDetailView(item: item)) {
+                                    ItemRowView(item: item)
+                                        .padding(.horizontal, 16)
+                                }
+                                .buttonStyle(.plain)
+                            }
                         }
                     }
-                    .listStyle(.plain)
-                    .background(Color(uiColor: .secondarySystemBackground).ignoresSafeArea())
-                    .scrollContentBackground(.hidden)
+                    
+                    Spacer().frame(height: 40)
                 }
             }
+            .background(Color(uiColor: .systemGroupedBackground).ignoresSafeArea())
             .navigationTitle(filterType.rawValue)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: { showingAddSheet = true }) {
                         Image(systemName: "plus")
+                            .font(.system(size: 16, weight: .bold))
+                            .foregroundColor(.white)
+                            .frame(width: 32, height: 32)
+                            .background(Color.blue)
+                            .clipShape(Circle())
                     }
                 }
             }
@@ -61,5 +156,42 @@ struct ItemListView: View {
                 AddClipboardItemView(defaultType: filterType)
             }
         }
+    }
+}
+
+// 顶部数据看板组件
+struct DashboardCard: View {
+    var title: String
+    var icon: String
+    var iconColor: Color
+    var count: Int
+    var showArrow: Bool = false
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 6) {
+                Image(systemName: icon)
+                    .foregroundColor(iconColor)
+                    .font(.system(size: 16))
+                
+                Text(title)
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                
+                if showArrow {
+                    Image(systemName: "arrow.right.arrow.left")
+                        .foregroundColor(.secondary)
+                        .font(.system(size: 10))
+                }
+            }
+            
+            Text("\(count)")
+                .font(.system(size: 32, weight: .bold))
+                .foregroundColor(.primary)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(16)
+        .background(Color(uiColor: .secondarySystemGroupedBackground))
+        .cornerRadius(16)
     }
 }
