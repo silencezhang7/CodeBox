@@ -48,6 +48,7 @@ struct ItemRowView: View {
                             .stroke(Color.secondary, lineWidth: 1.5)
                             .frame(width: 20, height: 20)
                     }
+                    .buttonStyle(.plain)
                 }
             }
             
