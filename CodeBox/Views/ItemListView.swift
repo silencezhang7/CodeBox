@@ -7,6 +7,7 @@ struct ItemListView: View {
     @State private var showingAddSheet = false
     @State private var showingQuickMarkBanner = true
     @State private var editMode: EditMode = .inactive
+    @State private var isMultiSelecting = false
     @State private var selectedItems = Set<UUID>()
     @State private var itemToEdit: ClipboardItem? = nil
     
@@ -32,9 +33,17 @@ struct ItemListView: View {
         editMode == .active
     }
 
+    private var pendingDeleteAction: ((IndexSet) -> Void)? {
+        return { indexSet in deleteItems(from: pendingItems, at: indexSet) }
+    }
+    
+    private var completedDeleteAction: ((IndexSet) -> Void)? {
+        return { indexSet in deleteItems(from: completedItems, at: indexSet) }
+    }
+
     var body: some View {
         NavigationStack {
-            List {
+            List(selection: $selectedItems) {
                 // 1. 顶部数据看板
                 HStack(spacing: 16) {
                     // 待取卡片
@@ -62,8 +71,12 @@ struct ItemListView: View {
                 if !pendingItems.isEmpty {
                     Section {
                         ForEach(pendingItems) { item in
-                            NavigationLink(destination: ItemDetailView(item: item)) {
+                            ZStack {
                                 ItemRowView(item: item)
+                                NavigationLink(destination: ItemDetailView(item: item)) {
+                                    EmptyView()
+                                }
+                                .opacity(0)
                             }
                             .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
                             .listRowBackground(Color.clear)
@@ -80,10 +93,9 @@ struct ItemListView: View {
                                     Label("删除", systemImage: "trash")
                                 }
                             }
+                            .deleteDisabled(isMultiSelecting)
                         }
-                        .onDelete { indexSet in
-                            deleteItems(from: pendingItems, at: indexSet)
-                        }
+                        .onDelete(perform: pendingDeleteAction)
                     } header: {
                         HStack {
                             Text("待取件 (\(pendingItems.count))")
@@ -91,8 +103,37 @@ struct ItemListView: View {
                                 .foregroundColor(.primary)
                                 .textCase(nil)
                             Spacer()
-                            Image(systemName: "list.bullet")
-                                .foregroundColor(.secondary)
+                            
+                            if isEditing {
+                                Button("删除") {
+                                    deleteSelectedItems()
+                                }
+                                .font(.subheadline)
+                                .foregroundColor(selectedItems.isEmpty ? .gray : .red)
+                                .disabled(selectedItems.isEmpty)
+                                .padding(.trailing, 8)
+                                
+                                Button("取消") {
+                                    withAnimation {
+                                        editMode = .inactive
+                                        selectedItems.removeAll()
+                                    }
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                                        isMultiSelecting = false
+                                    }
+                                }
+                                .font(.subheadline)
+                                .foregroundColor(.blue)
+                            } else {
+                                Button("多选") {
+                                    isMultiSelecting = true
+                                    withAnimation {
+                                        editMode = .active
+                                    }
+                                }
+                                .font(.subheadline)
+                                .foregroundColor(.blue)
+                            }
                         }
                         .padding(.horizontal, 0)
                     }
@@ -137,16 +178,19 @@ struct ItemListView: View {
                 if !completedItems.isEmpty {
                     Section {
                         ForEach(completedItems) { item in
-                            NavigationLink(destination: ItemDetailView(item: item)) {
+                            ZStack {
                                 ItemRowView(item: item)
+                                NavigationLink(destination: ItemDetailView(item: item)) {
+                                    EmptyView()
+                                }
+                                .opacity(0)
                             }
                             .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
                             .listRowBackground(Color.clear)
                             .listRowSeparator(.hidden)
+                            .deleteDisabled(isMultiSelecting)
                         }
-                        .onDelete { indexSet in
-                            deleteItems(from: completedItems, at: indexSet)
-                        }
+                        .onDelete(perform: completedDeleteAction)
                     } header: {
                         HStack {
                             Text("已取件 (\(completedItems.count))")
@@ -154,6 +198,37 @@ struct ItemListView: View {
                                 .foregroundColor(.primary)
                                 .textCase(nil)
                             Spacer()
+                            
+                            if isEditing {
+                                Button("删除") {
+                                    deleteSelectedItems()
+                                }
+                                .font(.subheadline)
+                                .foregroundColor(selectedItems.isEmpty ? .gray : .red)
+                                .disabled(selectedItems.isEmpty)
+                                .padding(.trailing, 8)
+                                
+                                Button("取消") {
+                                    withAnimation {
+                                        editMode = .inactive
+                                        selectedItems.removeAll()
+                                    }
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                                        isMultiSelecting = false
+                                    }
+                                }
+                                .font(.subheadline)
+                                .foregroundColor(.blue)
+                            } else {
+                                Button("多选") {
+                                    isMultiSelecting = true
+                                    withAnimation {
+                                        editMode = .active
+                                    }
+                                }
+                                .font(.subheadline)
+                                .foregroundColor(.blue)
+                            }
                         }
                         .padding(.horizontal, 0)
                         .padding(.top, 8)
@@ -174,46 +249,15 @@ struct ItemListView: View {
             .background(Color(uiColor: .systemGroupedBackground).ignoresSafeArea())
             .navigationTitle(filterType.rawValue)
             .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    if isEditing {
-                        Button("完成") {
-                            withAnimation {
-                                editMode = .inactive
-                                selectedItems.removeAll()
-                            }
-                        }
-                    } else {
-                        Menu {
-                            Button(action: { showingAddSheet = true }) {
-                                Label("添加", systemImage: "plus")
-                            }
-                            if !items.isEmpty {
-                                Button(action: {
-                                    withAnimation {
-                                        editMode = .active
-                                    }
-                                }) {
-                                    Label("批量删除", systemImage: "trash")
-                                }
-                            }
-                        } label: {
-                            Image(systemName: "ellipsis.circle")
+                if !isEditing {
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Button(action: { showingAddSheet = true }) {
+                            Image(systemName: "plus")
                                 .font(.system(size: 16, weight: .bold))
                                 .foregroundColor(.white)
                                 .frame(width: 32, height: 32)
                                 .background(Color.blue)
                                 .clipShape(Circle())
-                        }
-                    }
-                }
-                
-                if isEditing && !selectedItems.isEmpty {
-                    ToolbarItem(placement: .bottomBar) {
-                        Button(role: .destructive) {
-                            deleteSelectedItems()
-                        } label: {
-                            Text("删除 (\(selectedItems.count))")
-                                .foregroundColor(.red)
                         }
                     }
                 }
@@ -253,6 +297,9 @@ struct ItemListView: View {
             }
             selectedItems.removeAll()
             editMode = .inactive
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            isMultiSelecting = false
         }
     }
 }
