@@ -41,6 +41,7 @@ struct ItemRowView: View {
                     Button(action: {
                         withAnimation {
                             item.isUsed = true
+                            item.usedAt = Date()
                         }
                     }) {
                         Circle()
@@ -108,7 +109,7 @@ struct ItemRowView: View {
                     Image(systemName: "checkmark.circle.fill")
                         .foregroundColor(.green)
                         .font(.system(size: 12))
-                    Text(item.createdAt.formatted(.dateTime.month().day().locale(Locale(identifier: "zh_CN"))))
+                    Text((item.usedAt ?? item.createdAt).formatted(.dateTime.month().day().locale(Locale(identifier: "zh_CN"))))
                         .font(.caption)
                         .foregroundColor(.green)
                 }
@@ -197,8 +198,13 @@ struct ItemDetailView: View {
                             .cornerRadius(12)
                         }
                         
-                        // 取件时间
-                        DetailInfoRow(title: "取件时间", content: item.createdAt.formatted(.dateTime.month().day().hour().minute().locale(Locale(identifier: "zh_CN"))))
+                        // 到件时间 (创建时间)
+                        DetailInfoRow(title: "到件时间", content: item.createdAt.formatted(.dateTime.month().day().hour().minute().locale(Locale(identifier: "zh_CN"))))
+                        
+                        // 取件时间 (如果已取)
+                        if item.isUsed, let usedAt = item.usedAt {
+                            DetailInfoRow(title: "取件时间", content: usedAt.formatted(.dateTime.month().day().hour().minute().locale(Locale(identifier: "zh_CN"))))
+                        }
                         
                         Spacer().frame(height: 40)
                         
@@ -207,6 +213,9 @@ struct ItemDetailView: View {
                             Button(action: {
                                 withAnimation {
                                     item.isUsed.toggle()
+                                    if item.isUsed {
+                                        item.usedAt = Date()
+                                    }
                                 }
                             }) {
                                 HStack {

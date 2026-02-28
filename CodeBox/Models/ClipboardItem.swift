@@ -19,10 +19,11 @@ final class ClipboardItem {
     var createdAt: Date = Date()
     var expiresAt: Date?
     var isUsed: Bool = false
+    var usedAt: Date?
 
     init(content: String, originalContent: String? = nil, typeRaw: String, sourcePlatform: String? = nil,
          stationName: String? = nil, stationAddress: String? = nil,
-         expiresAt: Date? = nil, isUsed: Bool = false) {
+         expiresAt: Date? = nil, isUsed: Bool = false, usedAt: Date? = nil) {
         self.id = UUID()
         self.content = content
         self.originalContent = originalContent
@@ -33,6 +34,7 @@ final class ClipboardItem {
         self.createdAt = Date()
         self.expiresAt = expiresAt
         self.isUsed = isUsed
+        self.usedAt = usedAt
     }
 
     @Transient
