@@ -67,6 +67,15 @@ struct ItemListView: View {
                 .listRowSeparator(.hidden)
                 .listRowInsets(EdgeInsets(top: 16, leading: 16, bottom: 8, trailing: 16))
                 
+                // 解决 SwiftUI 列表在没有结构变化时，进入编辑模式复选框不显示的 Bug
+                if !isEditing {
+                    Color.clear
+                        .frame(height: 0)
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
+                        .listRowInsets(EdgeInsets())
+                }
+                
                 // 2. 待取件区域
                 if !pendingItems.isEmpty {
                     Section {
