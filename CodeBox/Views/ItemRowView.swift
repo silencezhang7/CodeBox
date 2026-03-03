@@ -3,12 +3,17 @@ import SwiftData
 
 struct ItemRowView: View {
     @Bindable var item: ClipboardItem
+    @State private var showingQuickReminderEdit = false
 
     var body: some View {
         if item.isUsed {
             completedCard
         } else {
             pendingCard
+                .sheet(isPresented: $showingQuickReminderEdit) {
+                    QuickReminderEditView(item: item)
+                        .presentationDetents([.medium, .large])
+                }
         }
     }
 
@@ -20,11 +25,39 @@ struct ItemRowView: View {
                 // 左侧平台图标
                 ZStack {
                     RoundedRectangle(cornerRadius: 12)
-                        .fill(Color(red: 0.95, green: 0.75, blue: 0.35)) // 黄色
+                        .fill(item.type == .verificationCode ? Color(red: 0.35, green: 0.60, blue: 0.75) : Color(red: 0.95, green: 0.75, blue: 0.35))
                         .frame(width: 40, height: 40)
-                    Image(systemName: "box.truck")
+                    Image(systemName: item.type == .verificationCode ? "message.fill" : "box.truck")
                         .foregroundColor(.white)
                         .font(.system(size: 20))
+                }
+                
+                if item.type == .verificationCode {
+                    Text(item.sourcePlatform ?? "未知机构")
+                        .font(.headline)
+                        .foregroundColor(.primary)
+                } else {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(item.sourcePlatform ?? "快递取件")
+                            .font(.headline)
+                            .foregroundColor(.primary)
+                        
+                        Button(action: { showingQuickReminderEdit = true }) {
+                            HStack {
+                                Image(systemName: "bell.fill")
+                                    .font(.system(size: 10))
+                                Text(item.reminderText)
+                                    .font(.caption2)
+                                    .fontWeight(.medium)
+                            }
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background(Color.orange.opacity(0.15))
+                            .foregroundColor(.orange)
+                            .clipShape(Capsule())
+                        }
+                        .buttonStyle(.plain)
+                    }
                 }
                 
                 Spacer()
@@ -34,7 +67,7 @@ struct ItemRowView: View {
                     Circle()
                         .fill(Color.green)
                         .frame(width: 6, height: 6)
-                    Text("待取")
+                    Text(item.type == .verificationCode ? "未使用" : "待取")
                         .font(.system(size: 14))
                         .foregroundColor(.secondary)
                     
@@ -42,6 +75,7 @@ struct ItemRowView: View {
                         withAnimation {
                             item.isUsed = true
                             item.usedAt = Date()
+                            ReminderManager.shared.removeReminder(for: item)
                         }
                     }) {
                         Circle()
@@ -52,22 +86,36 @@ struct ItemRowView: View {
                 }
             }
             
-            // 中间：大字号取件码
+            // 中间：大字号取件码/验证码
             Text(item.content)
                 .font(.system(size: 32, weight: .bold))
                 .foregroundColor(.primary)
             
-            // 底部：地址和图标
-            HStack {
-                Text(item.stationAddress ?? item.stationName ?? "未知地址")
-                    .font(.subheadline)
+            // 底部：地址和图标 / 验证码时间信息
+            if item.type == .verificationCode {
+                HStack {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("创建时间: \(item.createdAt.formatted(.dateTime.month().day().hour().minute().locale(Locale(identifier: "zh_CN"))))")
+                        if let expiresAt = item.expiresAt {
+                            Text("有效时间: \(expiresAt.formatted(.dateTime.month().day().hour().minute().locale(Locale(identifier: "zh_CN"))))")
+                        }
+                    }
+                    .font(.caption)
                     .foregroundColor(.secondary)
-                
-                Spacer()
-                
-                Image(systemName: "person.circle.fill")
-                    .foregroundColor(Color.secondary.opacity(0.5))
-                    .font(.system(size: 24))
+                    Spacer()
+                }
+            } else {
+                HStack {
+                    Text(item.stationAddress ?? item.stationName ?? "未知地址")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                    
+                    Spacer()
+                    
+                    Image(systemName: "person.circle.fill")
+                        .foregroundColor(Color.secondary.opacity(0.5))
+                        .font(.system(size: 24))
+                }
             }
         }
         .padding(16)
@@ -126,6 +174,7 @@ struct ItemDetailView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
     @Bindable var item: ClipboardItem
+    @State private var showingEditSheet = false
     
     // 渐变背景色
     private let bgGradient = LinearGradient(
@@ -182,7 +231,7 @@ struct ItemDetailView: View {
                         
                         // 取件地点
                         if let address = item.stationAddress ?? item.stationName {
-                            DetailInfoRow(title: "取件地点", content: address)
+                            DetailInfoRow(title: item.type == .verificationCode ? "来源" : "取件地点", content: address)
                         }
                         
                         // 原始短信内容
@@ -204,7 +253,7 @@ struct ItemDetailView: View {
                         
                         // 取件时间 (如果已取)
                         if item.isUsed, let usedAt = item.usedAt {
-                            DetailInfoRow(title: "取件时间", content: usedAt.formatted(.dateTime.month().day().hour().minute().locale(Locale(identifier: "zh_CN"))))
+                            DetailInfoRow(title: item.type == .verificationCode ? "收取时间" : "取件时间", content: usedAt.formatted(.dateTime.month().day().hour().minute().locale(Locale(identifier: "zh_CN"))))
                         }
                         
                         Spacer().frame(height: 40)
@@ -216,12 +265,15 @@ struct ItemDetailView: View {
                                     item.isUsed.toggle()
                                     if item.isUsed {
                                         item.usedAt = Date()
+                                        ReminderManager.shared.removeReminder(for: item)
+                                    } else {
+                                        ReminderManager.shared.scheduleReminder(for: item)
                                     }
                                 }
                             }) {
                                 HStack {
                                     Image(systemName: item.isUsed ? "arrow.uturn.backward.circle" : "checkmark.circle")
-                                    Text(item.isUsed ? "标记为待取" : "标记为已取")
+                                    Text(item.isUsed ? (item.type == .verificationCode ? "标记为未收取" : "标记为待取") : (item.type == .verificationCode ? "标记为已收取" : "标记为已取"))
                                 }
                                 .font(.headline)
                                 .foregroundColor(.white)
@@ -232,6 +284,7 @@ struct ItemDetailView: View {
                             }
                             
                             Button(action: {
+                                ReminderManager.shared.removeReminder(for: item)
                                 modelContext.delete(item)
                                 dismiss()
                             }) {
@@ -259,25 +312,32 @@ struct ItemDetailView: View {
                 Button(action: { dismiss() }) {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 16, weight: .bold))
-                        .foregroundColor(.white)
+                        .foregroundColor(.primary)
                         .frame(width: 36, height: 36)
-                        .background(Color.white.opacity(0.2))
+                        .background(Color(uiColor: .systemBackground))
                         .clipShape(Circle())
                 }
+                .buttonStyle(.plain)
             }
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button(action: {
-                    // 编辑功能预留
+                    showingEditSheet = true
                 }) {
                     Text("编辑")
-                        .font(.system(size: 14))
-                        .foregroundColor(.white)
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 6)
-                        .background(Color.white.opacity(0.2))
+                        .font(.subheadline)
+                        .foregroundColor(.primary)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 8)
+                        .background(Color(uiColor: .systemBackground))
                         .clipShape(Capsule())
                 }
+                .buttonStyle(.plain)
             }
+        }
+        .toolbarBackground(.hidden, for: .navigationBar)
+        .sheet(isPresented: $showingEditSheet) {
+            EditClipboardItemView(item: item)
+                .presentationDetents([.medium, .large])
         }
     }
 }
@@ -313,5 +373,66 @@ struct DetailInfoRow: View {
         .padding(16)
         .background(Color(uiColor: .secondarySystemGroupedBackground))
         .cornerRadius(12)
+    }
+}
+
+struct QuickReminderEditView: View {
+    @Environment(\.modelContext) private var modelContext
+    @Environment(\.dismiss) private var dismiss
+    
+    @Bindable var item: ClipboardItem
+    
+        @State private var reminderType: ReminderType
+        @State private var reminderTime: Date
+    
+        init(item: ClipboardItem) {        self.item = item
+        _reminderType = State(initialValue: item.reminderType)
+        _reminderTime = State(initialValue: item.reminderTime ?? Date())
+    }
+    
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section(header: Text("提醒方式")) {
+                    Picker("提醒方式", selection: $reminderType) {
+                        ForEach(ReminderType.allCases, id: \.self) { t in
+                            Text(t.rawValue).tag(t)
+                        }
+                    }
+                    .pickerStyle(.menu)
+                    
+                    if reminderType == .exactTime {
+                        DatePicker("提醒时间", selection: $reminderTime, displayedComponents: [.date, .hourAndMinute])
+                    }
+                }
+            }
+            .navigationTitle("快捷修改提醒")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("取消") { dismiss() }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("保存") { save() }
+                }
+            }
+        }
+    }
+    
+    private func save() {
+        item.reminderTypeRaw = reminderType.rawValue
+        
+        if reminderType == .exactTime {
+            item.reminderTime = reminderTime
+        } else {
+            item.reminderTime = nil
+        }
+        
+        if !item.isUsed {
+            ReminderManager.shared.scheduleReminder(for: item)
+        }
+        
+        try? modelContext.save()
+        dismiss()
     }
 }

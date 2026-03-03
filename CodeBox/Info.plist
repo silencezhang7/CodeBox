@@ -4,5 +4,10 @@
 <dict>
 	<key>CFBundleDisplayName</key>
 	<string>码上取</string>
+	        <key>NSPhotoLibraryAddUsageDescription</key>
+	        <string>我们需要您的相册权限，以便将解析后的无水印视频保存到您的设备中。</string>
+	        <key>NSPhotoLibraryUsageDescription</key>
+	        <string>我们需要您的相册权限，以便将解析后的无水印视频保存到您的设备中。</string>
+	        <key>NSSupportsLiveActivities</key>	<true/>
 </dict>
 </plist>

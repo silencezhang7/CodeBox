@@ -6,6 +6,7 @@ struct AIRecognitionResult {
     var platform: String?
     var stationName: String?
     var stationAddress: String?
+    var expireMinutes: Int?
 }
 
 struct AIRecognitionService {
@@ -19,9 +20,10 @@ struct AIRecognitionService {
         {
           "type": "取件码" 或 "验证码" 或 "其他",
           "code": "提取的码，无则空字符串",
-          "platform": "平台名称（如菜鸟、丰巢、顺丰等），无则null",
+          "platform": "平台名称（如菜鸟、丰巢、顺丰，或者验证码的发送机构如支付宝、微信等），无则null",
           "stationName": "驿站名称，无则null",
-          "stationAddress": "驿站地址，无则null"
+          "stationAddress": "驿站地址，无则null",
+          "expireMinutes": "验证码的有效时间（分钟数，整数类型），如短信中提到'5分钟内有效'则为5，无则null"
         }
         """
 
@@ -44,9 +46,10 @@ struct AIRecognitionService {
         {
           "type": "取件码" 或 "验证码" 或 "其他",
           "code": "提取的码（取件码或验证码），无则空字符串",
-          "platform": "平台名称（如菜鸟、丰巢、顺丰等），无则null",
+          "platform": "平台名称（如菜鸟、丰巢、顺丰，或者验证码的发送机构如支付宝、微信等），无则null",
           "stationName": "驿站名称，无则null",
-          "stationAddress": "驿站地址，无则null"
+          "stationAddress": "驿站地址，无则null",
+          "expireMinutes": "验证码的有效时间（分钟数，整数类型），如短信中提到'5分钟内有效'则为5，无则null"
         }
 
         文本：\(text)
@@ -140,7 +143,8 @@ struct AIRecognitionService {
             code: code.isEmpty ? fallback : code,
             platform: result["platform"] as? String,
             stationName: result["stationName"] as? String,
-            stationAddress: result["stationAddress"] as? String
+            stationAddress: result["stationAddress"] as? String,
+            expireMinutes: result["expireMinutes"] as? Int
         )
     }
 

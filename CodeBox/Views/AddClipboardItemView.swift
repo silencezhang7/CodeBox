@@ -1,6 +1,8 @@
 import SwiftUI
 import UIKit
 import SwiftData
+@preconcurrency import MapKit
+import CoreLocation
 
 struct AddClipboardItemView: View {
     @Environment(\.modelContext) private var modelContext
@@ -17,6 +19,10 @@ struct AddClipboardItemView: View {
     @State private var detectedPlatform: String? = nil
     @State private var stationName: String? = nil
     @State private var stationAddress: String? = nil
+    @State private var expireMinutes: String = "5"
+    
+    @State private var reminderType: ReminderType = .default18
+    @State private var reminderTime: Date = Date()
 
     init(defaultType: ItemType) {
         _type = State(initialValue: defaultType)
@@ -199,8 +205,8 @@ struct AddClipboardItemView: View {
     private var extractedInfoSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 6) {
-                Image(systemName: "shippingbox.fill")
-                Text("取件信息").font(.headline).fontWeight(.bold)
+                Image(systemName: type == .verificationCode ? "message.fill" : "shippingbox.fill")
+                Text(type == .verificationCode ? "验证码信息" : "取件信息").font(.headline).fontWeight(.bold)
             }
 
             VStack(spacing: 0) {
@@ -228,26 +234,79 @@ struct AddClipboardItemView: View {
                 
                 Divider().padding(.leading, 40)
                 
-                InfoRow(icon: "number", title: "取件码", text: $extractedCode, placeholder: "如: 1-1-1")
-                
-                if type == .pickupCode {
+                if type == .verificationCode {
+                    InfoRow(icon: "number", title: "验证码", text: $extractedCode, placeholder: "如: 123456")
+                    
                     Divider().padding(.leading, 40)
-                    InfoRow(icon: "box.truck", title: "快递公司", text: Binding(
+                    InfoRow(icon: "building.2", title: "发送机构", text: Binding(
                         get: { detectedPlatform ?? "" },
                         set: { detectedPlatform = $0.isEmpty ? nil : $0 }
-                    ), placeholder: "如: 中通快递")
+                    ), placeholder: "如: 支付宝")
                     
                     Divider().padding(.leading, 40)
-                    InfoRow(icon: "building.2", title: "驿站名称", text: Binding(
-                        get: { stationName ?? "" },
-                        set: { stationName = $0.isEmpty ? nil : $0 }
-                    ), placeholder: "如: 菜鸟驿站")
+                    InfoRow(icon: "clock", title: "有效时间", text: $expireMinutes, placeholder: "单位: 分钟 (如: 5)")
+                } else {
+                    InfoRow(icon: "number", title: "取件码", text: $extractedCode, placeholder: "如: 1-1-1")
                     
-                    Divider().padding(.leading, 40)
-                    InfoRow(icon: "mappin.and.ellipse", title: "详细地址", text: Binding(
-                        get: { stationAddress ?? "" },
-                        set: { stationAddress = $0.isEmpty ? nil : $0 }
-                    ), placeholder: "驿站的详细地址")
+                    if type == .pickupCode {
+                        Divider().padding(.leading, 40)
+                        InfoRow(icon: "box.truck", title: "快递公司", text: Binding(
+                            get: { detectedPlatform ?? "" },
+                            set: { detectedPlatform = $0.isEmpty ? nil : $0 }
+                        ), placeholder: "如: 中通快递")
+                        
+                        Divider().padding(.leading, 40)
+                        InfoRow(icon: "building.2", title: "驿站名称", text: Binding(
+                            get: { stationName ?? "" },
+                            set: { stationName = $0.isEmpty ? nil : $0 }
+                        ), placeholder: "如: 菜鸟驿站")
+                        
+                        Divider().padding(.leading, 40)
+                        InfoRow(icon: "mappin.and.ellipse", title: "详细地址", text: Binding(
+                            get: { stationAddress ?? "" },
+                            set: { stationAddress = $0.isEmpty ? nil : $0 }
+                        ), placeholder: "驿站的详细地址")
+                        
+                        Divider().padding(.leading, 40)
+                        HStack(spacing: 12) {
+                            Image(systemName: "bell.badge")
+                                .font(.system(size: 16))
+                                .foregroundColor(.secondary)
+                                .frame(width: 24)
+                            Text("提醒方式")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                                .frame(width: 65, alignment: .leading)
+                            Picker("", selection: $reminderType) {
+                                ForEach(ReminderType.allCases, id: \.self) { t in
+                                    Text(t.rawValue).tag(t)
+                                }
+                            }
+                            .pickerStyle(.menu)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 10)
+                        
+                        if reminderType == .exactTime {
+                            Divider().padding(.leading, 40)
+                            HStack(spacing: 12) {
+                                Image(systemName: "clock")
+                                    .font(.system(size: 16))
+                                    .foregroundColor(.secondary)
+                                    .frame(width: 24)
+                                Text("提醒时间")
+                                    .font(.subheadline)
+                                    .foregroundColor(.secondary)
+                                    .frame(width: 65, alignment: .leading)
+                                DatePicker("", selection: $reminderTime, displayedComponents: [.date, .hourAndMinute])
+                                    .labelsHidden()
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                            }
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 10)
+                        }
+                    }
                 }
             }
             .background(Color(uiColor: .systemBackground))
@@ -278,6 +337,13 @@ struct AddClipboardItemView: View {
                     detectedPlatform = result.platform
                     stationName = result.stationName
                     stationAddress = result.stationAddress
+                    if let mins = result.expireMinutes {
+                        expireMinutes = String(mins)
+                    } else if result.type == .verificationCode {
+                        // Keep the default "5" if AI couldn't find an expiration time,
+                        // but you could also set it to empty "" if you prefer the user to always enter it manually
+                        // if AI fails to extract it. Leaving as default "5" for now if null.
+                    }
                 }
             } catch {
                 await MainActor.run {
@@ -297,19 +363,33 @@ struct AddClipboardItemView: View {
 
     private func save() {
         let finalCode = extractedCode.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? content : extractedCode
-        let expiration = type == .verificationCode
-            ? Date().addingTimeInterval(300)
-            : Date().addingTimeInterval(86400 * 3)
+        let expiration: Date
+        if type == .verificationCode {
+            if let mins = Double(expireMinutes) {
+                expiration = Date().addingTimeInterval(mins * 60)
+            } else {
+                expiration = Date().addingTimeInterval(300) // Default 5 mins
+            }
+        } else {
+            expiration = Date().addingTimeInterval(86400 * 3)
+        }
 
         let newItem = ClipboardItem(
             content: finalCode,
             originalContent: content,
             typeRaw: type.rawValue,
-            sourcePlatform: detectedPlatform,
-            stationName: stationName,
-            stationAddress: stationAddress,
-            expiresAt: expiration
-        )
+                                    sourcePlatform: detectedPlatform,
+                                    stationName: stationName,
+                                    stationAddress: stationAddress,
+                                    expiresAt: expiration
+                                )            
+                    if type == .pickupCode {            newItem.reminderTypeRaw = reminderType.rawValue
+            if reminderType == .exactTime {
+                newItem.reminderTime = reminderTime
+            }
+            ReminderManager.shared.scheduleReminder(for: newItem)
+        }
+        
         modelContext.insert(newItem)
         dismiss()
     }
@@ -341,3 +421,4 @@ fileprivate struct InfoRow: View {
         .padding(.vertical, 14)
     }
 }
+

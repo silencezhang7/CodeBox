@@ -7,6 +7,17 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		10095318424FF3C04B0D9E61 /* CodeBoxWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 94D7D0BF07E3D2E06DCF52DD /* CodeBoxWidgetExtension.appex */; };
+		14DDE6D753537D2582852F40 /* CodeBoxAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = F34ABEC7AFF7617CC7F67680 /* CodeBoxAttributes.swift */; };
+		189259B593F9C821E2A12D2C /* AuthViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93A45A478007DB867C8B44DD /* AuthViews.swift */; };
+		189C7EACFE35A488D5E8BAB8 /* CodeBoxAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = F34ABEC7AFF7617CC7F67680 /* CodeBoxAttributes.swift */; };
+		20104406908B3C9CCC3D3DB4 /* VideoDownloadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF7DA370E8098A230586BB58 /* VideoDownloadView.swift */; };
+		244EB0E53E60DBBE1A3E3315 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B52597A1324C12EC3FAB7239 /* Foundation.framework */; };
+		6F9AEEB70DA89EE8C33F4016 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3C3432FE6CA683E74AC4796 /* User.swift */; };
+		71C8B62EDA523F809973C03C /* StatisticsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE679DF8D7CB57536CFBD351 /* StatisticsView.swift */; };
+		8AC2A3737117784FF122BF4C /* EditClipboardItemView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53C2914C07A4E51AD65B1732 /* EditClipboardItemView.swift */; };
+		8FF8C48AF8D4D532A7E03880 /* CodeBoxWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11803F6D600F8A5936FB0CD4 /* CodeBoxWidget.swift */; };
+		9801DF9A313C46FFC1ABED5D /* ReminderManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE60307447378901F66A3E0C /* ReminderManager.swift */; };
 		CC00012F4ECAF600AAA06F01 /* CodeBoxApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB00012F4ECAF600AAA06F01 /* CodeBoxApp.swift */; };
 		CC00022F4ECAF600AAA06F02 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB00022F4ECAF600AAA06F02 /* ContentView.swift */; };
 		CC00032F4ECAF600AAA06F03 /* ClipboardItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB00032F4ECAF600AAA06F03 /* ClipboardItem.swift */; };
@@ -30,10 +41,39 @@
 		CC00152F4ECAF600AAA06F15 /* AppShortcuts.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB00152F4ECAF600AAA06F15 /* AppShortcuts.swift */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		F910EE2129D6B98018520EC5 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 975855D32F4ECAF600AAA06F /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 508D7FA42EED040EA42AC9C2;
+			remoteInfo = CodeBoxWidgetExtension;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		EEC524607505CBF065C7EBED /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				10095318424FF3C04B0D9E61 /* CodeBoxWidgetExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
+		11803F6D600F8A5936FB0CD4 /* CodeBoxWidget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CodeBoxWidget.swift; sourceTree = "<group>"; };
+		53C2914C07A4E51AD65B1732 /* EditClipboardItemView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EditClipboardItemView.swift; sourceTree = "<group>"; };
+		93A45A478007DB867C8B44DD /* AuthViews.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AuthViews.swift; sourceTree = "<group>"; };
+		94D7D0BF07E3D2E06DCF52DD /* CodeBoxWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = CodeBoxWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		975856BC2F50340D00AAA06F /* CodeBox.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CodeBox.entitlements; sourceTree = "<group>"; };
 		975856BD2F503EB800AAA06F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		AA0002AA2F4ECAF600AAA06F /* CodeBox.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CodeBox.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		B52597A1324C12EC3FAB7239 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
 		BB00012F4ECAF600AAA06F01 /* CodeBoxApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodeBoxApp.swift; sourceTree = "<group>"; };
 		BB00022F4ECAF600AAA06F02 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		BB00032F4ECAF600AAA06F03 /* ClipboardItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipboardItem.swift; sourceTree = "<group>"; };
@@ -55,6 +95,11 @@
 		BB00132F4ECAF600AAA06F13 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		BB00142F4ECAF600AAA06F14 /* ScreenshotMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenshotMonitor.swift; sourceTree = "<group>"; };
 		BB00152F4ECAF600AAA06F15 /* AppShortcuts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppShortcuts.swift; sourceTree = "<group>"; };
+		BF7DA370E8098A230586BB58 /* VideoDownloadView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VideoDownloadView.swift; sourceTree = "<group>"; };
+		CE60307447378901F66A3E0C /* ReminderManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ReminderManager.swift; sourceTree = "<group>"; };
+		CE679DF8D7CB57536CFBD351 /* StatisticsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StatisticsView.swift; sourceTree = "<group>"; };
+		F34ABEC7AFF7617CC7F67680 /* CodeBoxAttributes.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CodeBoxAttributes.swift; sourceTree = "<group>"; };
+		F3C3432FE6CA683E74AC4796 /* User.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -65,14 +110,41 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		FDBAB84E25722C943230C196 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				244EB0E53E60DBBE1A3E3315 /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		45A2F960C28DB9CEAD9FE781 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				A105C6351DD106C74D35F344 /* iOS */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		62839C2933E54662EB16FEA6 /* CodeBoxWidgetExtension */ = {
+			isa = PBXGroup;
+			children = (
+				11803F6D600F8A5936FB0CD4 /* CodeBoxWidget.swift */,
+				F34ABEC7AFF7617CC7F67680 /* CodeBoxAttributes.swift */,
+			);
+			path = CodeBoxWidgetExtension;
+			sourceTree = "<group>";
+		};
 		975855D22F4ECAF600AAA06F = {
 			isa = PBXGroup;
 			children = (
 				DD00012F4ECAF600AAA06F01 /* CodeBox */,
 				975855DC2F4ECAF600AAA06F /* Products */,
+				45A2F960C28DB9CEAD9FE781 /* Frameworks */,
+				62839C2933E54662EB16FEA6 /* CodeBoxWidgetExtension */,
 			);
 			sourceTree = "<group>";
 		};
@@ -80,8 +152,17 @@
 			isa = PBXGroup;
 			children = (
 				AA0002AA2F4ECAF600AAA06F /* CodeBox.app */,
+				94D7D0BF07E3D2E06DCF52DD /* CodeBoxWidgetExtension.appex */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		A105C6351DD106C74D35F344 /* iOS */ = {
+			isa = PBXGroup;
+			children = (
+				B52597A1324C12EC3FAB7239 /* Foundation.framework */,
+			);
+			name = iOS;
 			sourceTree = "<group>";
 		};
 		DD00012F4ECAF600AAA06F01 /* CodeBox */ = {
@@ -105,6 +186,7 @@
 				BB00042F4ECAF600AAA06F04 /* AIModel.swift */,
 				BB00052F4ECAF600AAA06F05 /* AIProvider.swift */,
 				BB00062F4ECAF600AAA06F06 /* AppTheme.swift */,
+				F3C3432FE6CA683E74AC4796 /* User.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -121,6 +203,10 @@
 				BB000D2F4ECAF600AAA06F0D /* AddModelView.swift */,
 				BB000E2F4ECAF600AAA06F0E /* LiquidGlassModifier.swift */,
 				BB00022F4ECAF600AAA06F02 /* ContentView.swift */,
+				53C2914C07A4E51AD65B1732 /* EditClipboardItemView.swift */,
+				93A45A478007DB867C8B44DD /* AuthViews.swift */,
+				CE679DF8D7CB57536CFBD351 /* StatisticsView.swift */,
+				BF7DA370E8098A230586BB58 /* VideoDownloadView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -134,6 +220,7 @@
 				BB00122F4ECAF600AAA06F12 /* AddItemIntent.swift */,
 				BB00142F4ECAF600AAA06F14 /* ScreenshotMonitor.swift */,
 				BB00152F4ECAF600AAA06F15 /* AppShortcuts.swift */,
+				CE60307447378901F66A3E0C /* ReminderManager.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -141,6 +228,23 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		508D7FA42EED040EA42AC9C2 /* CodeBoxWidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 5FD8759D557A549246697132 /* Build configuration list for PBXNativeTarget "CodeBoxWidgetExtension" */;
+			buildPhases = (
+				00278712010DB04307EFDD77 /* Sources */,
+				FDBAB84E25722C943230C196 /* Frameworks */,
+				DF8DBD8C2DF7467CF49A7DB0 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = CodeBoxWidgetExtension;
+			productName = CodeBoxWidgetExtension;
+			productReference = 94D7D0BF07E3D2E06DCF52DD /* CodeBoxWidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		AA0001AA2F4ECAF600AAA06F /* CodeBox */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = AA0006AA2F4ECAF600AAA06F /* Build configuration list for PBXNativeTarget "CodeBox" */;
@@ -148,14 +252,14 @@
 				AA0005AA2F4ECAF600AAA06F /* Frameworks */,
 				AA0004AA2F4ECAF600AAA06F /* Resources */,
 				AA0003AA2F4ECAF600AAA06F /* Sources */,
+				EEC524607505CBF065C7EBED /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				E1817291BBF54DA36CC14FF7 /* PBXTargetDependency */,
 			);
 			name = CodeBox;
-			packageProductDependencies = (
-			);
 			productName = CodeBox;
 			productReference = AA0002AA2F4ECAF600AAA06F /* CodeBox.app */;
 			productType = "com.apple.product-type.application";
@@ -190,6 +294,7 @@
 			projectRoot = "";
 			targets = (
 				AA0001AA2F4ECAF600AAA06F /* CodeBox */,
+				508D7FA42EED040EA42AC9C2 /* CodeBoxWidgetExtension */,
 			);
 		};
 /* End PBXProject section */
@@ -203,9 +308,25 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		DF8DBD8C2DF7467CF49A7DB0 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		00278712010DB04307EFDD77 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8FF8C48AF8D4D532A7E03880 /* CodeBoxWidget.swift in Sources */,
+				14DDE6D753537D2582852F40 /* CodeBoxAttributes.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		AA0003AA2F4ECAF600AAA06F /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -230,12 +351,99 @@
 				CC00122F4ECAF600AAA06F12 /* AddItemIntent.swift in Sources */,
 				CC00142F4ECAF600AAA06F14 /* ScreenshotMonitor.swift in Sources */,
 				CC00152F4ECAF600AAA06F15 /* AppShortcuts.swift in Sources */,
+				189C7EACFE35A488D5E8BAB8 /* CodeBoxAttributes.swift in Sources */,
+				9801DF9A313C46FFC1ABED5D /* ReminderManager.swift in Sources */,
+				8AC2A3737117784FF122BF4C /* EditClipboardItemView.swift in Sources */,
+				6F9AEEB70DA89EE8C33F4016 /* User.swift in Sources */,
+				189259B593F9C821E2A12D2C /* AuthViews.swift in Sources */,
+				71C8B62EDA523F809973C03C /* StatisticsView.swift in Sources */,
+				20104406908B3C9CCC3D3DB4 /* VideoDownloadView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		E1817291BBF54DA36CC14FF7 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = CodeBoxWidgetExtension;
+			target = 508D7FA42EED040EA42AC9C2 /* CodeBoxWidgetExtension */;
+			targetProxy = F910EE2129D6B98018520EC5 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		15DADD6A51A16CA23CB36324 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = GATS57PR7G;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = CodeBoxWidgetExtension/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = CodeBoxWidget;
+				INFOPLIST_KEY_CFBundleShortVersionString = 1.0;
+				INFOPLIST_KEY_CFBundleVersion = 1;
+				INFOPLIST_KEY_LSRequiresIPhoneOS = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jiezhang.CodeBox.CodeBoxWidgetExtension;
+				PRODUCT_NAME = CodeBoxWidgetExtension;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		4B04C5E0B8E2AB726C0FC550 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = GATS57PR7G;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = CodeBoxWidgetExtension/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = CodeBoxWidget;
+				INFOPLIST_KEY_CFBundleShortVersionString = 1.0;
+				INFOPLIST_KEY_CFBundleVersion = 1;
+				INFOPLIST_KEY_LSRequiresIPhoneOS = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jiezhang.CodeBox.CodeBoxWidgetExtension;
+				PRODUCT_NAME = CodeBoxWidgetExtension;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
 		975855E42F4ECAF800AAA06F /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -420,6 +628,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		5FD8759D557A549246697132 /* Build configuration list for PBXNativeTarget "CodeBoxWidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				15DADD6A51A16CA23CB36324 /* Release */,
+				4B04C5E0B8E2AB726C0FC550 /* Debug */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		975855D62F4ECAF600AAA06F /* Build configuration list for PBXProject "CodeBox" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

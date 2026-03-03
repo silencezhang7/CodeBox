@@ -41,6 +41,31 @@ struct ItemListView: View {
         return { indexSet in deleteItems(from: completedItems, at: indexSet) }
     }
 
+    // Dynamic strings based on item type
+    private var pendingTitle: String {
+        filterType == .verificationCode ? "未使用" : "待取"
+    }
+    
+    private var completedTitle: String {
+        filterType == .verificationCode ? "已收取" : "本月已取"
+    }
+    
+    private var pendingSectionTitle: String {
+        filterType == .verificationCode ? "待使用验证码" : "待取件"
+    }
+    
+    private var completedSectionTitle: String {
+        filterType == .verificationCode ? "已收取验证码" : "已取件"
+    }
+    
+    private var quickMarkTitle: String {
+        filterType == .verificationCode ? "快速标记已收取" : "快速标记已取"
+    }
+    
+    private var quickMarkDesc: String {
+        filterType == .verificationCode ? "点击未使用卡片即可快速标记为已收取" : "点击待取件卡片即可快速标记为已取"
+    }
+
     var body: some View {
         NavigationStack {
             List(selection: $selectedItems) {
@@ -48,7 +73,7 @@ struct ItemListView: View {
                 HStack(spacing: 16) {
                     // 待取卡片
                     DashboardCard(
-                        title: "待取",
+                        title: pendingTitle,
                         icon: "shippingbox.circle.fill",
                         iconColor: .orange,
                         count: pendingItems.count
@@ -56,7 +81,7 @@ struct ItemListView: View {
                     
                     // 已取卡片
                     DashboardCard(
-                        title: "本月已取",
+                        title: completedTitle,
                         icon: "checkmark.square.fill",
                         iconColor: .green,
                         count: completedItems.count,
@@ -74,6 +99,7 @@ struct ItemListView: View {
                         .listRowBackground(Color.clear)
                         .listRowSeparator(.hidden)
                         .listRowInsets(EdgeInsets())
+                        .alignmentGuide(.listRowSeparatorLeading) { _ in 0 }
                 }
                 
                 // 2. 待取件区域
@@ -107,7 +133,7 @@ struct ItemListView: View {
                         .onDelete(perform: pendingDeleteAction)
                     } header: {
                         HStack {
-                            Text("待取件 (\(pendingItems.count))")
+                            Text("\(pendingSectionTitle) (\(pendingItems.count))")
                                 .font(.headline)
                                 .foregroundColor(.primary)
                                 .textCase(nil)
@@ -145,6 +171,7 @@ struct ItemListView: View {
                             }
                         }
                         .padding(.horizontal, 0)
+                        .padding(.top, -10)
                     }
                 }
                 
@@ -156,11 +183,11 @@ struct ItemListView: View {
                             .font(.system(size: 24))
                         
                         VStack(alignment: .leading, spacing: 4) {
-                            Text("快速标记已取")
+                            Text(quickMarkTitle)
                                 .font(.subheadline)
                                 .fontWeight(.bold)
                                 .foregroundColor(.primary)
-                            Text("点击待取件卡片即可快速标记为已取")
+                            Text(quickMarkDesc)
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                         }
@@ -202,7 +229,7 @@ struct ItemListView: View {
                         .onDelete(perform: completedDeleteAction)
                     } header: {
                         HStack {
-                            Text("已取件 (\(completedItems.count))")
+                            Text("\(completedSectionTitle) (\(completedItems.count))")
                                 .font(.headline)
                                 .foregroundColor(.primary)
                                 .textCase(nil)
@@ -276,15 +303,15 @@ struct ItemListView: View {
                 AddClipboardItemView(defaultType: filterType)
             }
             .sheet(item: $itemToEdit) { item in
-                // TODO: Replace with an actual edit view
-                // For now reusing the add view with modified logic or just passing the item
-                AddClipboardItemView(defaultType: filterType) 
+                EditClipboardItemView(item: item)
+                    .presentationDetents([.medium, .large])
             }
         }
     }
     
     private func deleteItem(_ item: ClipboardItem) {
         withAnimation {
+            ReminderManager.shared.removeReminder(for: item)
             modelContext.delete(item)
         }
     }
@@ -292,7 +319,9 @@ struct ItemListView: View {
     private func deleteItems(from array: [ClipboardItem], at offsets: IndexSet) {
         withAnimation {
             for index in offsets {
-                modelContext.delete(array[index])
+                let item = array[index]
+                ReminderManager.shared.removeReminder(for: item)
+                modelContext.delete(item)
             }
         }
     }
@@ -301,6 +330,7 @@ struct ItemListView: View {
         withAnimation {
             for itemId in selectedItems {
                 if let item = items.first(where: { $0.id == itemId }) {
+                    ReminderManager.shared.removeReminder(for: item)
                     modelContext.delete(item)
                 }
             }

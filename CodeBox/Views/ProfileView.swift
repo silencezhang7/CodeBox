@@ -7,6 +7,13 @@ struct ProfileView: View {
     @AppStorage("pickup_notification") private var pickupNotification: Bool = true
     @Query(sort: \AIModel.createdAt) private var models: [AIModel]
     @AppStorage("active_model_id") private var activeModelId: String = ""
+    @AppStorage("currentUsername") private var currentUsername: String = ""
+    @AppStorage("isLoggedIn") private var isLoggedIn: Bool = false
+    @Query private var users: [User]
+    
+    private var currentUser: User? {
+        users.first { $0.username == currentUsername }
+    }
 
     private var activeModelName: String {
         models.first { $0.id.uuidString == activeModelId }?.displayName ?? "未配置"
@@ -20,17 +27,25 @@ struct ProfileView: View {
                     HStack {
                         Spacer()
                         VStack(spacing: 10) {
-                            ZStack {
-                                Circle()
-                                    .fill(
-                                        LinearGradient(colors: [.indigo, .purple], startPoint: .topLeading, endPoint: .bottomTrailing)
-                                    )
+                            if let user = currentUser, let avatarData = user.avatarData, let uiImage = UIImage(data: avatarData) {
+                                Image(uiImage: uiImage)
+                                    .resizable()
+                                    .scaledToFill()
                                     .frame(width: 80, height: 80)
-                                Image(systemName: "person.fill")
-                                    .font(.system(size: 36))
-                                    .foregroundColor(.white)
+                                    .clipShape(Circle())
+                            } else {
+                                ZStack {
+                                    Circle()
+                                        .fill(
+                                            LinearGradient(colors: [.indigo, .purple], startPoint: .topLeading, endPoint: .bottomTrailing)
+                                        )
+                                        .frame(width: 80, height: 80)
+                                    Image(systemName: "person.fill")
+                                        .font(.system(size: 36))
+                                        .foregroundColor(.white)
+                                }
                             }
-                            Text("用户")
+                            Text(currentUser?.username ?? "用户")
                                 .font(.headline)
                         }
                         .padding(.vertical, 12)
@@ -75,6 +90,30 @@ struct ProfileView: View {
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                         }
+                    }
+                }
+                .listRowBackground(Color.clear.background(.regularMaterial))
+                
+                // 实用工具
+                Section("实用工具") {
+                    NavigationLink {
+                        VideoDownloadView()
+                    } label: {
+                        Label("无水印视频解析", systemImage: "arrow.down.doc.fill")
+                    }
+                }
+                .listRowBackground(Color.clear.background(.regularMaterial))
+                
+                Section {
+                    Button(action: {
+                        withAnimation {
+                            isLoggedIn = false
+                            currentUsername = ""
+                        }
+                    }) {
+                        Text("退出登录")
+                            .foregroundColor(.red)
+                            .frame(maxWidth: .infinity, alignment: .center)
                     }
                 }
                 .listRowBackground(Color.clear.background(.regularMaterial))
