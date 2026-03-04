@@ -122,11 +122,12 @@ struct RegisterView: View {
             }
             .onChange(of: avatarItem) { _, _ in
                 Task { @MainActor in
-                    if let data = try? await avatarItem?.loadTransferable(type: Data.self) {
-                        avatarData = data
-                        if let uiImage = UIImage(data: data) {
-                            avatarImage = Image(uiImage: uiImage)
-                        }
+                    if let data = try? await avatarItem?.loadTransferable(type: Data.self),
+                       let uiImage = UIImage(data: data) {
+                        // 压缩图片数据，防止过大导致 SwiftData 保存失败
+                        let compressedData = uiImage.jpegData(compressionQuality: 0.5)
+                        avatarData = compressedData
+                        avatarImage = Image(uiImage: uiImage)
                     }
                 }
             }

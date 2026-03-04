@@ -10,6 +10,7 @@ struct ItemListView: View {
     @State private var isMultiSelecting = false
     @State private var selectedItems = Set<UUID>()
     @State private var itemToEdit: ClipboardItem? = nil
+    @State private var itemToDetail: ClipboardItem? = nil
     
     let filterType: ItemType
 
@@ -106,17 +107,14 @@ struct ItemListView: View {
                 if !pendingItems.isEmpty {
                     Section {
                         ForEach(pendingItems) { item in
-                            ZStack {
-                                ItemRowView(item: item)
-                                NavigationLink(destination: ItemDetailView(item: item)) {
-                                    EmptyView()
+                            ItemRowView(item: item)
+                                .onTapGesture {
+                                    itemToDetail = item
                                 }
-                                .opacity(0)
-                            }
-                            .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
-                            .listRowBackground(Color.clear)
-                            .listRowSeparator(.hidden)
-                            .contextMenu {
+                                .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
+                                .listRowBackground(Color.clear)
+                                .listRowSeparator(.hidden)
+                                .contextMenu {
                                 Button {
                                     itemToEdit = item
                                 } label: {
@@ -214,17 +212,14 @@ struct ItemListView: View {
                 if !completedItems.isEmpty {
                     Section {
                         ForEach(completedItems) { item in
-                            ZStack {
-                                ItemRowView(item: item)
-                                NavigationLink(destination: ItemDetailView(item: item)) {
-                                    EmptyView()
+                            ItemRowView(item: item)
+                                .onTapGesture {
+                                    itemToDetail = item
                                 }
-                                .opacity(0)
-                            }
-                            .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
-                            .listRowBackground(Color.clear)
-                            .listRowSeparator(.hidden)
-                            .deleteDisabled(isMultiSelecting)
+                                .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
+                                .listRowBackground(Color.clear)
+                                .listRowSeparator(.hidden)
+                                .deleteDisabled(isMultiSelecting)
                         }
                         .onDelete(perform: completedDeleteAction)
                     } header: {
@@ -305,6 +300,9 @@ struct ItemListView: View {
             .sheet(item: $itemToEdit) { item in
                 EditClipboardItemView(item: item)
                     .presentationDetents([.medium, .large])
+            }
+            .navigationDestination(item: $itemToDetail) { item in
+                ItemDetailView(item: item)
             }
         }
     }

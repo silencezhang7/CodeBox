@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleDisplayName</key>
-	<string>码上取</string>
+	<string>超级工具箱</string>
 	        <key>NSPhotoLibraryAddUsageDescription</key>
 	        <string>我们需要您的相册权限，以便将解析后的无水印视频保存到您的设备中。</string>
 	        <key>NSPhotoLibraryUsageDescription</key>

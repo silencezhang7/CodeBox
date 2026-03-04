@@ -8,6 +8,7 @@ struct ContentView: View {
     @Environment(\.scenePhase) private var scenePhase
     @Query private var allItems: [ClipboardItem]
     @State private var screenshotMonitor = ScreenshotMonitor()
+    @State private var showingVideoDownload = false
 
     var body: some View {
         if isLoggedIn {
@@ -32,6 +33,17 @@ struct ContentView: View {
                     .tabItem {
                         Label("我的", systemImage: "person.fill")
                     }
+            }
+            .onTapGesture(count: 2) {
+                showingVideoDownload = true
+            }
+            .sheet(isPresented: $showingVideoDownload) {
+                NavigationStack {
+                    VideoDownloadView()
+                        .navigationBarItems(trailing: Button("关闭") {
+                            showingVideoDownload = false
+                        })
+                }
             }
             .preferredColorScheme(AppTheme(rawValue: themeRaw)?.colorScheme)
             .onAppear { screenshotMonitor.start(context: modelContext) }

@@ -39,6 +39,7 @@
 		CC00132F4ECAF600AAA06F13 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BB00132F4ECAF600AAA06F13 /* Assets.xcassets */; };
 		CC00142F4ECAF600AAA06F14 /* ScreenshotMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB00142F4ECAF600AAA06F14 /* ScreenshotMonitor.swift */; };
 		CC00152F4ECAF600AAA06F15 /* AppShortcuts.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB00152F4ECAF600AAA06F15 /* AppShortcuts.swift */; };
+		E3F1890CC327DAC63A1F8179 /* VideoDeduplicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F638AED8B9C9E18E92C4C0B9 /* VideoDeduplicator.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -100,6 +101,7 @@
 		CE679DF8D7CB57536CFBD351 /* StatisticsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StatisticsView.swift; sourceTree = "<group>"; };
 		F34ABEC7AFF7617CC7F67680 /* CodeBoxAttributes.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CodeBoxAttributes.swift; sourceTree = "<group>"; };
 		F3C3432FE6CA683E74AC4796 /* User.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
+		F638AED8B9C9E18E92C4C0B9 /* VideoDeduplicator.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VideoDeduplicator.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -221,6 +223,7 @@
 				BB00142F4ECAF600AAA06F14 /* ScreenshotMonitor.swift */,
 				BB00152F4ECAF600AAA06F15 /* AppShortcuts.swift */,
 				CE60307447378901F66A3E0C /* ReminderManager.swift */,
+				F638AED8B9C9E18E92C4C0B9 /* VideoDeduplicator.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -358,6 +361,7 @@
 				189259B593F9C821E2A12D2C /* AuthViews.swift in Sources */,
 				71C8B62EDA523F809973C03C /* StatisticsView.swift in Sources */,
 				20104406908B3C9CCC3D3DB4 /* VideoDownloadView.swift in Sources */,
+				E3F1890CC327DAC63A1F8179 /* VideoDeduplicator.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

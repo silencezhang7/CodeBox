@@ -6,10 +6,13 @@ struct VideoDownloadView: View {
     @State private var inputLink: String = ""
     @State private var isParsing: Bool = false
     @State private var parsedVideoURL: URL? = nil
+    @State private var parsedCaption: String? = nil
     @State private var errorMessage: String? = nil
     @State private var isDownloading: Bool = false
     @State private var downloadProgress: Double = 0.0
     @State private var showSuccessAlert: Bool = false
+    @State private var showCopySuccessAlert: Bool = false
+    @State private var enableDeduplication: Bool = false
     @FocusState private var isInputFocused: Bool
     
     var body: some View {
@@ -112,6 +115,12 @@ struct VideoDownloadView: View {
                             .frame(height: 300)
                             .cornerRadius(12)
                         
+                        Toggle(isOn: $enableDeduplication) {
+                            Text("开启深度去重防搬运")
+                                .font(.subheadline)
+                        }
+                        .padding(.horizontal, 5)
+                        
                         Button {
                             Task {
                                 await downloadAndSaveVideo(url: videoURL)
@@ -136,6 +145,24 @@ struct VideoDownloadView: View {
                             .cornerRadius(12)
                         }
                         .disabled(isDownloading)
+                        
+                        if let caption = parsedCaption, !caption.isEmpty {
+                            Button {
+                                UIPasteboard.general.string = caption
+                                showCopySuccessAlert = true
+                            } label: {
+                                HStack {
+                                    Image(systemName: "doc.on.clipboard")
+                                    Text("复制视频文案")
+                                        .fontWeight(.bold)
+                                }
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(Color(uiColor: .systemGray5))
+                                .foregroundColor(.primary)
+                                .cornerRadius(12)
+                            }
+                        }
                     }
                     .padding()
                     .background(Color(uiColor: .systemBackground))
@@ -152,6 +179,11 @@ struct VideoDownloadView: View {
             Button("确定", role: .cancel) { }
         } message: {
             Text("视频已成功保存到您的相册。")
+        }
+        .alert("复制成功", isPresented: $showCopySuccessAlert) {
+            Button("确定", role: .cancel) { }
+        } message: {
+            Text("文案已复制到剪贴板。")
         }
     }
     
@@ -173,6 +205,7 @@ struct VideoDownloadView: View {
         isParsing = true
         errorMessage = nil
         parsedVideoURL = nil
+        parsedCaption = nil
         
         guard let urlString = extractURL(from: inputLink), let url = URL(string: urlString) else {
             errorMessage = "未检测到有效的链接，请检查输入内容"
@@ -181,17 +214,18 @@ struct VideoDownloadView: View {
         }
         
         do {
-            let parsedUrl: URL
+            let parsedResult: (URL, String?)
             if url.host?.contains("douyin.com") == true {
-                parsedUrl = try await parseDouyin(url: url)
+                parsedResult = try await parseDouyin(url: url)
             } else if url.host?.contains("kuaishou.com") == true {
-                parsedUrl = try await parseKuaishou(url: url)
+                parsedResult = try await parseKuaishou(url: url)
             } else {
                 throw NSError(domain: "ParseError", code: 0, userInfo: [NSLocalizedDescriptionKey: "目前仅支持抖音和快手分享链接"])
             }
             
             await MainActor.run {
-                self.parsedVideoURL = parsedUrl
+                self.parsedVideoURL = parsedResult.0
+                self.parsedCaption = parsedResult.1
                 self.isParsing = false
                 self.isInputFocused = false
             }
@@ -205,7 +239,7 @@ struct VideoDownloadView: View {
         }
     }
     
-    private func parseDouyin(url: URL) async throws -> URL {
+    private func parseDouyin(url: URL) async throws -> (URL, String?) {
         var request = URLRequest(url: url)
         request.setValue("Mozilla/5.0 (iPhone; CPU iPhone OS 17_2 like Mac OS X) AppleWebKit/605.1.15", forHTTPHeaderField: "User-Agent")
         
@@ -270,10 +304,12 @@ struct VideoDownloadView: View {
             throw NSError(domain: "ParseError", code: 0, userInfo: [NSLocalizedDescriptionKey: "无效的无水印视频链接"])
         }
         
-        return noWatermarkUrl
+        let caption = firstItem["desc"] as? String
+        
+        return (noWatermarkUrl, caption)
     }
     
-    private func parseKuaishou(url: URL) async throws -> URL {
+    private func parseKuaishou(url: URL) async throws -> (URL, String?) {
         var request = URLRequest(url: url)
         request.setValue("Mozilla/5.0 (iPhone; CPU iPhone OS 17_2 like Mac OS X) AppleWebKit/605.1.15", forHTTPHeaderField: "User-Agent")
         
@@ -300,7 +336,16 @@ struct VideoDownloadView: View {
             throw NSError(domain: "ParseError", code: 0, userInfo: [NSLocalizedDescriptionKey: "无法从快手页面中提取视频链接"])
         }
         
-        return parsedUrl
+        var caption: String? = nil
+        let captionPattern = "\"caption\":\"(.*?)\""
+        if let capRegex = try? NSRegularExpression(pattern: captionPattern, options: []),
+           let capMatch = capRegex.firstMatch(in: html, options: [], range: nsRange),
+           let capRange = Range(capMatch.range(at: 1), in: html) {
+            caption = String(html[capRange])
+                .replacingOccurrences(of: "\\n", with: "\n")
+        }
+        
+        return (parsedUrl, caption)
     }
     
     private func downloadAndSaveVideo(url: URL) async {
@@ -320,6 +365,29 @@ struct VideoDownloadView: View {
                 throw URLError(.badServerResponse)
             }
             
+            let fileToSave: URL
+            let fileManager = FileManager.default
+            
+            if enableDeduplication {
+                // 执行去重操作
+                let tempDir = fileManager.temporaryDirectory
+                let dedupedURL = tempDir.appendingPathComponent(UUID().uuidString + "_deduped.mp4")
+                
+                let deduplicator = VideoDeduplicator()
+                fileToSave = try await withCheckedThrowingContinuation { continuation in
+                    deduplicator.processVideo(inputURL: targetURL, outputURL: dedupedURL) { result in
+                        switch result {
+                        case .success(let url):
+                            continuation.resume(returning: url)
+                        case .failure(let error):
+                            continuation.resume(throwing: error)
+                        }
+                    }
+                }
+            } else {
+                fileToSave = targetURL
+            }
+            
             // 2. Request Photo Library access
             let status = await PHPhotoLibrary.requestAuthorization(for: .addOnly)
             guard status == .authorized || status == .limited else {
@@ -329,7 +397,7 @@ struct VideoDownloadView: View {
             // 3. Save to Photos using UIKit
             await withCheckedContinuation { continuation in
                 let saver = VideoSaver()
-                saver.saveVideo(at: targetURL) { error in
+                saver.saveVideo(at: fileToSave) { error in
                     if let error = error {
                         print("Save error: \(error.localizedDescription)")
                     }
@@ -338,7 +406,10 @@ struct VideoDownloadView: View {
             }
             
             // 4. 清理临时文件
-            try? FileManager.default.removeItem(at: targetURL)
+            try? fileManager.removeItem(at: targetURL)
+            if enableDeduplication {
+                try? fileManager.removeItem(at: fileToSave)
+            }
             
             await MainActor.run {
                 downloadProgress = 1.0
